@@ -266,41 +266,41 @@ html, body {
 
 .pixel-red { color: var(--red); }
 
-/* Steps 2×2 grid */
+/* Steps — single column, vertical list */
 .steps-grid {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 28px;
-  align-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
 }
 
 .step {
   display: flex;
-  gap: 8px;
+  gap: 20px;
   align-items: flex-start;
 }
 
 .step-n {
   font-family: 'Syne', sans-serif;
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: var(--red);
   line-height: 1;
   flex-shrink: 0;
-  width: 22px;
+  width: 32px;
   padding-top: 1px;
 }
 
 .step-r {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 
 .step-t {
   font-family: 'Syne', sans-serif;
-  font-size: 0.56rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -309,7 +309,7 @@ html, body {
 }
 
 .step-d {
-  font-size: 0.46rem;
+  font-size: 0.54rem;
   line-height: 1.45;
   color: var(--ink-mid);
 }
@@ -363,10 +363,10 @@ html, body {
   .back-pad { padding: 8px; }
   .instr { padding: 12px 14px 8px; }
   .instr-head { padding-bottom: 6px; margin-bottom: 6px; }
-  .steps-grid { gap: 6px 14px; }
-  .step-n { font-size: 0.85rem; width: 18px; }
-  .step-t { font-size: 0.48rem; }
-  .step-d { font-size: 0.4rem; }
+  .steps-grid { gap: 8px; }
+  .step-n { font-size: 0.95rem; width: 20px; }
+  .step-t { font-size: 0.52rem; }
+  .step-d { font-size: 0.44rem; }
   .pixel-sm { font-size: 0.45rem; }
   .instr-foot { font-size: 0.36rem; }
 }
