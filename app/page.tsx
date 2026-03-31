@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 const PHONE_NUMBER = "+1 (800) 911-5683";
 
@@ -55,9 +55,16 @@ function jaggedClip(): string {
 
 const CLIP = jaggedClip();
 
+/* ── Tilt config ── */
+const TILT_MAX = 14; // degrees
+
 export default function HomePage() {
   const [flipped, setFlipped] = useState(false);
   const [copied, setCopied] = useState(false);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const tiltRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef<number>(0);
+  const flippingRef = useRef(false);
 
   const copyNumber = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -75,7 +82,57 @@ export default function HomePage() {
     setTimeout(() => setCopied(false), 2000);
   }, []);
 
-  const flip = useCallback(() => setFlipped((f) => !f), []);
+  const flip = useCallback(() => {
+    const card = sceneRef.current?.querySelector(".card") as HTMLElement | null;
+    if (!card) return;
+    // Use slow transition for the flip, then restore fast tilt transition
+    flippingRef.current = true;
+    card.style.transition = "transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1)";
+    setFlipped((f) => !f);
+    setTimeout(() => {
+      flippingRef.current = false;
+      if (card) card.style.transition = "";
+    }, 750);
+  }, []);
+
+  /* ── 3D tilt handlers ── */
+  const applyTilt = useCallback(() => {
+    const el = sceneRef.current;
+    if (!el) return;
+    const card = el.querySelector(".card") as HTMLElement | null;
+    if (!card) return;
+    const { x, y } = tiltRef.current;
+    // Compose tilt with flip
+    const flipY = flipped ? 180 : 0;
+    card.style.transform = `rotateX(${y}deg) rotateY(${flipY + x}deg)`;
+  }, [flipped]);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (flippingRef.current) return; // don't tilt during flip
+      const el = sceneRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      // Normalized -1 to 1 from center
+      const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      tiltRef.current = {
+        x: nx * TILT_MAX,
+        y: -ny * TILT_MAX, // inverted: mouse up = tilt back
+      };
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(applyTilt);
+    },
+    [applyTilt]
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    tiltRef.current = { x: 0, y: 0 };
+    const card = sceneRef.current?.querySelector(".card") as HTMLElement | null;
+    if (!card) return;
+    const flipY = flipped ? 180 : 0;
+    card.style.transform = `rotateX(0deg) rotateY(${flipY}deg)`;
+  }, [flipped]);
 
   return (
     <main className="page">
@@ -83,8 +140,11 @@ export default function HomePage() {
       <div className="glow" aria-hidden="true" />
 
       <div
+        ref={sceneRef}
         className={`scene${flipped ? " is-flipped" : ""}`}
         onClick={flip}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -100,14 +160,42 @@ export default function HomePage() {
           <div className="face front">
             <div className="card-grain" aria-hidden="true" />
 
-            {/* Embossed heart — subtle raised impression */}
+            {/* Debossed heart — carpet-shaved / pressed into surface */}
             <div className="emboss-wrap" aria-hidden="true">
               <svg
-                className="emboss-svg"
+                className="deboss-svg"
                 viewBox="0 0 512 512"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path d={HEART_D} fill="rgba(0,0,0,0.05)" />
+                <defs>
+                  <filter id="deboss" x="-10%" y="-10%" width="120%" height="120%">
+                    {/* Inner shadow — dark on top-left edge */}
+                    <feOffset dx="0" dy="2" in="SourceAlpha" result="off1" />
+                    <feGaussianBlur in="off1" stdDeviation="1.5" result="blur1" />
+                    <feComposite in="blur1" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="innerShadow1" />
+                    <feFlood floodColor="#000000" floodOpacity="0.35" result="color1" />
+                    <feComposite in="color1" in2="innerShadow1" operator="in" result="shadow1" />
+
+                    {/* Inner highlight — light on bottom-right edge */}
+                    <feOffset dx="0" dy="-1.5" in="SourceAlpha" result="off2" />
+                    <feGaussianBlur in="off2" stdDeviation="1" result="blur2" />
+                    <feComposite in="blur2" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="innerShadow2" />
+                    <feFlood floodColor="#ffffff" floodOpacity="0.12" result="color2" />
+                    <feComposite in="color2" in2="innerShadow2" operator="in" result="shadow2" />
+
+                    {/* Fill the shape with a slightly darker red */}
+                    <feFlood floodColor="#000000" floodOpacity="0.12" result="baseFill" />
+                    <feComposite in="baseFill" in2="SourceAlpha" operator="in" result="coloredBase" />
+
+                    {/* Merge all layers */}
+                    <feMerge>
+                      <feMergeNode in="coloredBase" />
+                      <feMergeNode in="shadow1" />
+                      <feMergeNode in="shadow2" />
+                    </feMerge>
+                  </filter>
+                </defs>
+                <path d={HEART_D} filter="url(#deboss)" />
               </svg>
             </div>
 
