@@ -1,219 +1,171 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 
 const PHONE_NUMBER = "+1 (800) 911-5683";
 
-const ALERT_MESSAGES = [
-  "SIGNAL LOST",
-  "HEARTBEAT FLATLINE",
-  "CONNECTION SEVERED",
-  "LOVE DISCONNECTED",
-  "CALLER UNREACHABLE",
-  "TRANSMISSION FAILED",
-  "NO SIGNAL DETECTED",
-  "LAST MESSAGE SENT",
-  "LINE DEAD",
-  "FREQUENCY LOST",
-  "SOS UNANSWERED",
-  "STATIC ON ALL CHANNELS",
-  "BROADCAST INTERRUPTED",
-  "AWAITING RESPONSE",
-  "MISSED CONNECTION",
-  "DROPPED CALL",
-  "VOICEMAIL FULL",
-  "END OF TRANSMISSION",
-  "REDIAL FAILED",
+const HEART_D =
+  "M256 448l-30.164-27.211C118.718 322.927 48 258.373 48 180.539 48 117.428 97.918 66 160.243 66c36.196 0 70.266 16.71 95.757 43.178C281.491 82.71 315.561 66 351.757 66 414.082 66 464 117.428 464 180.539c0 77.834-70.718 142.388-177.836 240.25L256 448z";
+
+const STEPS = [
+  {
+    n: "01",
+    t: "DIAL THE NUMBER",
+    d: "Call the number on the front of this card. The line is live 24/7.",
+  },
+  {
+    n: "02",
+    t: "LISTEN",
+    d: "An AI voice agent will pick up. Wait for the greeting to finish.",
+  },
+  {
+    n: "03",
+    t: "SPEAK",
+    d: "Say whatever you need to. No time limit, no judgment, no recording.",
+  },
+  {
+    n: "04",
+    t: "HANG UP",
+    d: "End the call when you're done. The line will be here next time.",
+  },
 ];
 
-function buildTickerRow(offset: number) {
-  const doubled = [...ALERT_MESSAGES, ...ALERT_MESSAGES];
-  const shifted = [
-    ...doubled.slice(offset % ALERT_MESSAGES.length),
-    ...doubled.slice(0, offset % ALERT_MESSAGES.length),
-  ];
-  return shifted.map((msg, i) => (
-    <span key={i} className="ticker-bubble">
-      <span className="bubble-icon">⚠</span>
-      {msg}
-    </span>
-  ));
+/* ── Jagged clip-path for landscape card ──
+   Zigzag teeth on all four edges of the white inner area.
+   More horizontal teeth (wider card), fewer vertical. */
+function jaggedClip(): string {
+  const hT = 22;  // horizontal teeth
+  const vT = 12;  // vertical teeth
+  const dp = 3;   // depth %
+  const hS = 100 / hT;
+  const vS = 100 / vT;
+  const p: string[] = [];
+
+  for (let i = 0; i <= hT; i++)
+    p.push(`${(i * hS).toFixed(2)}% ${i % 2 ? dp : 0}%`);
+  for (let i = 1; i < vT; i++)
+    p.push(`${i % 2 ? 100 - dp : 100}% ${(i * vS).toFixed(2)}%`);
+  for (let i = hT; i >= 0; i--)
+    p.push(`${(i * hS).toFixed(2)}% ${i % 2 ? 100 - dp : 100}%`);
+  for (let i = vT - 1; i >= 1; i--)
+    p.push(`${i % 2 ? dp : 0}% ${(i * vS).toFixed(2)}%`);
+
+  return `polygon(${p.join(", ")})`;
 }
 
-/* ── Dithered heart SVG ── */
-function DitherHeart({ id, className }: { id: string; className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 512 512"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <defs>
-        <pattern id={`${id}-dots-sm`} x="0" y="0" width="6" height="6" patternUnits="userSpaceOnUse">
-          <circle cx="1.5" cy="1.5" r="1.2" fill="currentColor" opacity="0.9" />
-        </pattern>
-        <pattern id={`${id}-dots-md`} x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-          <circle cx="5" cy="5" r="2.2" fill="currentColor" opacity="0.6" />
-        </pattern>
-        <pattern id={`${id}-dots-lg`} x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">
-          <circle cx="8" cy="8" r="3.5" fill="currentColor" opacity="0.35" />
-        </pattern>
-        <pattern id={`${id}-lines`} x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-          <line x1="0" y1="0" x2="0" y2="8" stroke="currentColor" strokeWidth="1" opacity="0.18" />
-        </pattern>
-        <clipPath id={`${id}-clip`}>
-          <path d="M256 448l-30.164-27.211C118.718 322.927 48 258.373 48 180.539 48 117.428 97.918 66 160.243 66c36.196 0 70.266 16.71 95.757 43.178C281.491 82.71 315.561 66 351.757 66 414.082 66 464 117.428 464 180.539c0 77.834-70.718 142.388-177.836 240.25L256 448z" />
-        </clipPath>
-        <filter id={`${id}-glow`} x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="18" />
-        </filter>
-      </defs>
-
-      <path d="M256 448l-30.164-27.211C118.718 322.927 48 258.373 48 180.539 48 117.428 97.918 66 160.243 66c36.196 0 70.266 16.71 95.757 43.178C281.491 82.71 315.561 66 351.757 66 414.082 66 464 117.428 464 180.539c0 77.834-70.718 142.388-177.836 240.25L256 448z" fill="currentColor" opacity="0.15" />
-      <g clipPath={`url(#${id}-clip)`}><rect width="512" height="512" fill={`url(#${id}-dots-lg)`} /></g>
-      <g clipPath={`url(#${id}-clip)`}><rect width="512" height="512" fill={`url(#${id}-dots-md)`} /></g>
-      <g clipPath={`url(#${id}-clip)`}><rect width="512" height="512" fill={`url(#${id}-dots-sm)`} /></g>
-      <g clipPath={`url(#${id}-clip)`}><rect width="512" height="512" fill={`url(#${id}-lines)`} /></g>
-      <path d="M256 448l-30.164-27.211C118.718 322.927 48 258.373 48 180.539 48 117.428 97.918 66 160.243 66c36.196 0 70.266 16.71 95.757 43.178C281.491 82.71 315.561 66 351.757 66 414.082 66 464 117.428 464 180.539c0 77.834-70.718 142.388-177.836 240.25L256 448z" fill="currentColor" opacity="0.1" filter={`url(#${id}-glow)`} />
-    </svg>
-  );
-}
+const CLIP = jaggedClip();
 
 export default function HomePage() {
+  const [flipped, setFlipped] = useState(false);
   const [copied, setCopied] = useState(false);
-  const heartRef = useRef<HTMLDivElement>(null);
-  const heartGhostRef = useRef<HTMLDivElement>(null);
-  const mousePos = useRef({ x: 0.5, y: 0.5 });
-  const animFrame = useRef<number>(0);
 
-  const handleCopy = useCallback(async () => {
+  const copyNumber = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       await navigator.clipboard.writeText(PHONE_NUMBER);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     } catch {
-      const ta = document.createElement("textarea");
-      ta.value = PHONE_NUMBER;
-      document.body.appendChild(ta);
-      ta.select();
+      const t = document.createElement("textarea");
+      t.value = PHONE_NUMBER;
+      document.body.appendChild(t);
+      t.select();
       document.execCommand("copy");
-      document.body.removeChild(ta);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      document.body.removeChild(t);
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }, []);
 
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      mousePos.current = {
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight,
-      };
-    };
-    window.addEventListener("mousemove", onMove);
-
-    let prev = { x: 0.5, y: 0.5 };
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-    const tick = () => {
-      prev.x = lerp(prev.x, mousePos.current.x, 0.06);
-      prev.y = lerp(prev.y, mousePos.current.y, 0.06);
-      const dx = (prev.x - 0.5) * 2;
-      const dy = (prev.y - 0.5) * 2;
-
-      if (heartRef.current) {
-        heartRef.current.style.transform =
-          `translate(calc(-50% + ${dx * 40}px), calc(-50% + ${dy * 35}px)) rotate(${dx * 2}deg) scale(${1 + Math.abs(dy) * 0.02})`;
-      }
-      if (heartGhostRef.current) {
-        heartGhostRef.current.style.transform =
-          `translate(calc(-50% + ${dx * -20}px), calc(-50% + ${dy * -15}px)) rotate(${dx * -1}deg)`;
-      }
-      animFrame.current = requestAnimationFrame(tick);
-    };
-
-    animFrame.current = requestAnimationFrame(tick);
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(animFrame.current);
-    };
-  }, []);
+  const flip = useCallback(() => setFlipped((f) => !f), []);
 
   return (
     <main className="page">
-      {/* ── Alert bar ── */}
-      <div className="alert-bar">
-        <span className="alert-blink">▮</span>
-        <span>EMERGENCY ALERT SYSTEM</span>
-        <span className="alert-sep">│</span>
-        <span>DATELINE v1.0</span>
-        <span className="alert-sep">│</span>
-        <span>STATUS: <span className="alert-blink">ACTIVE</span></span>
-      </div>
+      <div className="grain" aria-hidden="true" />
+      <div className="glow" aria-hidden="true" />
 
-      {/* ── Dithered heart layers ── */}
-      <div className="heart-layer heart-ghost" ref={heartGhostRef} aria-hidden="true">
-        <DitherHeart id="ghost" className="heart-svg" />
-      </div>
-      <div className="heart-layer heart-main" ref={heartRef} aria-hidden="true">
-        <DitherHeart id="main" className="heart-svg" />
-      </div>
+      <div
+        className={`scene${flipped ? " is-flipped" : ""}`}
+        onClick={flip}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            flip();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={flipped ? "Flip card to front" : "Flip card to back"}
+      >
+        <div className="card">
+          {/* ═══ FRONT ═══ */}
+          <div className="face front">
+            <div className="card-grain" aria-hidden="true" />
 
-      {/* ── Ticker rows ── */}
-      <div className="ticker-layer">
-        <div className="ticker-row ticker-row-1">{buildTickerRow(0)}</div>
-        <div className="ticker-row ticker-row-2">{buildTickerRow(5)}</div>
-        <div className="ticker-row ticker-row-3">{buildTickerRow(11)}</div>
-        <div className="ticker-row ticker-row-4">{buildTickerRow(3)}</div>
-        <div className="ticker-row ticker-row-5">{buildTickerRow(8)}</div>
-        <div className="ticker-row ticker-row-6">{buildTickerRow(14)}</div>
-      </div>
+            {/* Embossed heart — subtle raised impression */}
+            <div className="emboss-wrap" aria-hidden="true">
+              <svg
+                className="emboss-svg"
+                viewBox="0 0 512 512"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d={HEART_D} fill="rgba(0,0,0,0.05)" />
+              </svg>
+            </div>
 
-      {/* ── Center content ── */}
-      <div className="center-column">
-        {/* System warning header */}
-        <div className="sys-warning">
-          <span className="sys-blink">●</span>
-          INCOMING BROADCAST
+            {/* Bottom info bar — Monika card layout */}
+            <div className="front-bottom">
+              <div className="front-left">
+                <span className="brand-text">DATELINE</span>
+                <span className="info-text">
+                  EMERGENCY CALLBACK SYSTEM.
+                </span>
+                <button className="phone-btn" onClick={copyNumber}>
+                  {copied ? "✓ COPIED TO CLIPBOARD" : PHONE_NUMBER}
+                </button>
+              </div>
+              <div className="front-right">
+                <span className="action-text">FLIP →</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ═══ BACK ═══ */}
+          <div className="face back">
+            <div className="back-pad">
+              <div className="jagged" style={{ clipPath: CLIP }}>
+                <div className="instr">
+                  <div className="instr-head">
+                    <span className="pixel-sm pixel-red">
+                      HOW TO USE THIS NUMBER
+                    </span>
+                  </div>
+
+                  <div className="steps-grid">
+                    {STEPS.map((s) => (
+                      <div key={s.n} className="step">
+                        <span className="step-n">{s.n}</span>
+                        <div className="step-r">
+                          <span className="step-t">{s.t}</span>
+                          <span className="step-d">{s.d}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="instr-foot">
+                    <span>DATELINE v1.0</span>
+                    <span>← FLIP BACK</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <h1 className="brand">DATELINE</h1>
-
-        <div className="sys-status">
-          ┌─ SYSTEM STATUS ──────────────────────┐
-          <br />
-          │ HEARTBEAT MONITOR ... <span className="status-red">FLATLINE</span>
-          <br />
-          │ SIGNAL STRENGTH ... <span className="status-red">0%</span>
-          <br />
-          │ LAST CONTACT ... <span className="status-dim">UNKNOWN</span>
-          <br />
-          └──────────────────────────────────────┘
-        </div>
-
-        <div className="alert-divider" aria-hidden="true">
-          ▸▸▸ CALL THE LINE ◂◂◂
-        </div>
-
-        <button className="number-btn" onClick={handleCopy} title="Click to copy number">
-          <span className="number-label">EMERGENCY HOTLINE</span>
-          <span className="number-text">{PHONE_NUMBER}</span>
-          <span className="copy-hint">{copied ? "▸ COPIED TO CLIPBOARD" : "▸ TAP TO COPY"}</span>
-        </button>
-
-        <div className="sys-footer-msg">
-          THIS IS NOT A TEST. IF YOU OR SOMEONE YOU KNOW HAS EXPERIENCED
-          <br />
-          A DROPPED CALL, MISSED CONNECTION, OR LOVE DISCONNECTED —
-          <br />
-          <span className="footer-highlight">CALL THE LINE IMMEDIATELY.</span>
-        </div>
-
-        <footer className="footer">
-          █ DATELINE EMERGENCY CALLBACK SYSTEM █ TWILIO → ELEVENLABS AGENT BRIDGE █
-        </footer>
       </div>
+
+      <footer className="page-foot">
+        MISSED CONNECTION? DROPPED CALL?{" "}
+        <strong>CALL THE LINE.</strong>
+      </footer>
     </main>
   );
 }
