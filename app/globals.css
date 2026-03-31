@@ -1,0 +1,344 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Azeret+Mono:wght@400;600;700&display=swap');
+
+:root {
+  color-scheme: dark;
+  --bg: #06050a;
+  --bg-raised: #0f0d18;
+  --surface: #181424;
+  --imessage-blue: #1982FC;
+  --magenta: #d946a8;
+  --magenta-bright: #f472c4;
+  --magenta-glow: rgba(217, 70, 168, 0.3);
+  --ink: #e8e2f0;
+  --ink-mid: #9e94af;
+  --ink-dim: #5c5470;
+  --ink-faint: #2a2540;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Azeret Mono', 'SFMono-Regular', Consolas, monospace;
+  background: var(--bg);
+  color: var(--ink);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  cursor: crosshair;
+}
+
+/* ── Soft vignette only ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    rgba(6, 5, 10, 0.35) 65%,
+    rgba(6, 5, 10, 0.75) 100%
+  );
+  pointer-events: none;
+  z-index: 90;
+}
+
+/* ═══════════════════════════════════════════
+   PAGE LAYOUT
+   ═══════════════════════════════════════════ */
+
+.page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════
+   INTERACTIVE LOGO — same layer as content
+   ═══════════════════════════════════════════ */
+
+.logo-layer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.logo-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* smooth rendering — no pixelation */
+  image-rendering: auto;
+}
+
+/* Color layer: large, vivid, sits WITH the content */
+.logo-layer-color {
+  width: 70vmin;
+  height: 84vmin;
+  z-index: 15;
+  opacity: 0.65;
+  animation: breathe-color 7s ease-in-out infinite;
+  filter:
+    drop-shadow(0 0 50px rgba(217, 70, 168, 0.18))
+    drop-shadow(0 0 100px rgba(217, 70, 168, 0.07));
+}
+
+/* Mono layer: ghost echo behind */
+.logo-layer-mono {
+  width: 76vmin;
+  height: 91vmin;
+  z-index: 5;
+  opacity: 0.08;
+  animation: breathe-mono 9s ease-in-out infinite;
+  filter: brightness(2.5);
+}
+
+@keyframes breathe-color {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.78; }
+}
+
+@keyframes breathe-mono {
+  0%, 100% { opacity: 0.06; }
+  50% { opacity: 0.14; }
+}
+
+/* ═══════════════════════════════════════════
+   CENTER CONTENT — interleaved with logo
+   ═══════════════════════════════════════════ */
+
+.center-column {
+  position: relative;
+  z-index: 16;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 48px 24px 32px;
+  gap: 20px;
+  pointer-events: none;
+}
+
+.brand {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  font-weight: 300;
+  letter-spacing: 0.45em;
+  color: var(--ink);
+  text-indent: 0.45em;
+  text-shadow:
+    0 0 60px var(--magenta-glow),
+    0 0 120px rgba(217, 70, 168, 0.1),
+    0 2px 30px rgba(0, 0, 0, 0.8);
+  user-select: none;
+}
+
+.dither-divider {
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  color: var(--ink-dim);
+  text-align: center;
+  user-select: none;
+  opacity: 0.6;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Phone number ── */
+.number-btn {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 48px;
+  background: rgba(15, 13, 24, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(42, 37, 64, 0.6);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  position: relative;
+}
+
+.number-btn::before {
+  content: '┌░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░┐';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.45rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  opacity: 0.4;
+}
+
+.number-btn::after {
+  content: '└░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░┘';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.45rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  opacity: 0.4;
+}
+
+.number-btn:hover {
+  border-color: var(--magenta);
+  background: rgba(15, 13, 24, 0.7);
+  box-shadow:
+    0 0 50px rgba(217, 70, 168, 0.12),
+    inset 0 0 40px rgba(217, 70, 168, 0.03);
+  transform: translateY(-2px);
+}
+
+.number-btn:active {
+  transform: scale(0.97);
+}
+
+.number-text {
+  font-size: clamp(1.5rem, 5vw, 2.4rem);
+  font-weight: 700;
+  color: var(--magenta-bright);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 30px var(--magenta-glow);
+}
+
+.copy-hint {
+  font-size: 0.58rem;
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  transition: color 0.25s;
+}
+
+.number-btn:hover .copy-hint {
+  color: var(--ink-mid);
+}
+
+/* ── Footer ── */
+.footer {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 0.5rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* ═══════════════════════════════════════════
+   TICKER — blue iMessage bubbles
+   ═══════════════════════════════════════════ */
+
+.ticker-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.ticker-row {
+  position: absolute;
+  display: flex;
+  gap: 14px;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.ticker-bubble {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border-radius: 18px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.3;
+  color: #fff;
+  background: linear-gradient(135deg, var(--imessage-blue) 0%, #0a6ae0 100%);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(25, 130, 252, 0.06);
+  border-bottom-right-radius: 6px;
+}
+
+/* Alternate rows: received-style gray bubbles */
+.ticker-row-2 .ticker-bubble,
+.ticker-row-4 .ticker-bubble,
+.ticker-row-6 .ticker-bubble {
+  background: linear-gradient(135deg, #2a2542 0%, #201c32 100%);
+  color: var(--ink-mid);
+  border-bottom-right-radius: 18px;
+  border-bottom-left-radius: 6px;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.ticker-row-1 { top: 5%;  opacity: 0.45; animation: scroll-left  50s linear infinite; }
+.ticker-row-2 { top: 17%; opacity: 0.25; animation: scroll-right 62s linear infinite; }
+.ticker-row-3 { top: 33%; opacity: 0.15; animation: scroll-left  40s linear infinite; }
+.ticker-row-4 { top: 54%; opacity: 0.15; animation: scroll-right 56s linear infinite; }
+.ticker-row-5 { top: 73%; opacity: 0.25; animation: scroll-left  46s linear infinite; }
+.ticker-row-6 { top: 89%; opacity: 0.45; animation: scroll-right 58s linear infinite; }
+
+@keyframes scroll-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes scroll-right {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .center-column {
+    padding: 32px 16px 24px;
+    gap: 16px;
+  }
+
+  .logo-layer-color {
+    width: 90vmin;
+    height: 108vmin;
+  }
+
+  .logo-layer-mono {
+    width: 96vmin;
+    height: 115vmin;
+  }
+
+  .brand {
+    font-size: 2.2rem;
+  }
+
+  .ticker-bubble {
+    font-size: 0.58rem;
+    padding: 5px 11px;
+  }
+
+  .ticker-row { gap: 10px; }
+
+  .number-btn {
+    padding: 16px 28px;
+  }
+
+  .number-btn::before,
+  .number-btn::after {
+    display: none;
+  }
+}
