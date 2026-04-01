@@ -164,7 +164,32 @@ html, body {
   display: block;
 }
 
-/* ── Front bottom text (Monika-style layout) ── */
+/* ── DATELINE title spanning full card width ── */
+.front-title-wrap {
+  position: absolute;
+  top: 42%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 2;
+  padding: 0 20px;
+}
+
+.front-title {
+  font-family: 'Silkscreen', cursive;
+  font-size: 4.2rem;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 0.5px rgba(0, 0, 0, 0.2),
+    0 -1px 0.5px rgba(255, 255, 255, 0.45);
+}
+
+/* ── Front bottom text ── */
 
 .front-bottom {
   position: absolute;
@@ -182,14 +207,6 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 3px;
-}
-
-.brand-text {
-  font-family: 'Silkscreen', cursive;
-  font-size: 0.85rem;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.3;
 }
 
 .info-text {
@@ -293,6 +310,20 @@ html, body {
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.back-title {
+  font-family: 'Silkscreen', cursive;
+  font-size: 2.4rem;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.40);
+  text-shadow:
+    0 1px 0.5px rgba(0, 0, 0, 0.2),
+    0 -1px 0.5px rgba(255, 255, 255, 0.45);
+  line-height: 1;
 }
 
 .pixel-sm {
@@ -378,6 +409,35 @@ html, body {
     0 -1px 0.5px rgba(255, 255, 255, 0.35);
 }
 
+/* Back bottom — phone number below instructions */
+.back-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 22px 28px;
+  text-align: center;
+  z-index: 4;
+}
+
+.back-phone-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.45);
+  background: none;
+  border: none;
+  border-bottom: 1.5px dotted rgba(255, 255, 255, 0.25);
+  padding: 0 0 3px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.back-phone-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
 /* ═══════════════════════════════════
    PAGE FOOTER
    ═══════════════════════════════════ */
@@ -430,6 +490,7 @@ html, body {
   .action-text { font-size: 0.48rem; }
   .emboss-wrap { width: 44%; }
   .instr { padding: 12px 14px 8px; }
+  .back-title { font-size: 1.6rem; }
   .instr-head { padding-bottom: 6px; margin-bottom: 6px; }
   .steps-grid { gap: 10px; }
   .step-n { font-size: 1.4rem; width: 30px; }
