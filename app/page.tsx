@@ -30,33 +30,9 @@ const STEPS = [
   },
 ];
 
-/* ── Jagged clip-path for landscape card ──
-   Zigzag teeth on all four edges of the white inner area.
-   More horizontal teeth (wider card), fewer vertical. */
-function jaggedClip(): string {
-  const hT = 22;  // horizontal teeth
-  const vT = 12;  // vertical teeth
-  const dp = 3;   // depth %
-  const hS = 100 / hT;
-  const vS = 100 / vT;
-  const p: string[] = [];
-
-  for (let i = 0; i <= hT; i++)
-    p.push(`${(i * hS).toFixed(2)}% ${i % 2 ? dp : 0}%`);
-  for (let i = 1; i < vT; i++)
-    p.push(`${i % 2 ? 100 - dp : 100}% ${(i * vS).toFixed(2)}%`);
-  for (let i = hT; i >= 0; i--)
-    p.push(`${(i * hS).toFixed(2)}% ${i % 2 ? 100 - dp : 100}%`);
-  for (let i = vT - 1; i >= 1; i--)
-    p.push(`${i % 2 ? dp : 0}% ${(i * vS).toFixed(2)}%`);
-
-  return `polygon(${p.join(", ")})`;
-}
-
-const CLIP = jaggedClip();
-
 /* ── Tilt config ── */
-const TILT_MAX = 14; // degrees
+const TILT_MAX = 10; // degrees
+const LIFT = 40; // px — hover lift toward viewer
 
 export default function HomePage() {
   const [flipped, setFlipped] = useState(false);
@@ -84,15 +60,19 @@ export default function HomePage() {
 
   const flip = useCallback(() => {
     const card = sceneRef.current?.querySelector(".card") as HTMLElement | null;
-    if (!card) return;
-    // Use slow transition for the flip, then restore fast tilt transition
+    if (!card || flippingRef.current) return;
     flippingRef.current = true;
-    card.style.transition = "transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1)";
-    setFlipped((f) => !f);
+    card.style.transition = "transform 2s cubic-bezier(0.25, 0.1, 0.25, 1)";
+    setFlipped((f) => {
+      const next = !f;
+      const targetY = next ? 180 : 0;
+      card.style.transform = `translateZ(${LIFT}px) rotateX(0deg) rotateY(${targetY}deg)`;
+      return next;
+    });
     setTimeout(() => {
       flippingRef.current = false;
       if (card) card.style.transition = "";
-    }, 750);
+    }, 2050);
   }, []);
 
   /* ── 3D tilt handlers ── */
@@ -102,9 +82,8 @@ export default function HomePage() {
     const card = el.querySelector(".card") as HTMLElement | null;
     if (!card) return;
     const { x, y } = tiltRef.current;
-    // Compose tilt with flip
     const flipY = flipped ? 180 : 0;
-    card.style.transform = `rotateX(${y}deg) rotateY(${flipY + x}deg)`;
+    card.style.transform = `translateZ(${LIFT}px) rotateX(${y}deg) rotateY(${flipY + x}deg)`;
   }, [flipped]);
 
   const handleMouseMove = useCallback(
@@ -131,7 +110,7 @@ export default function HomePage() {
     const card = sceneRef.current?.querySelector(".card") as HTMLElement | null;
     if (!card) return;
     const flipY = flipped ? 180 : 0;
-    card.style.transform = `rotateX(0deg) rotateY(${flipY}deg)`;
+    card.style.transform = `translateZ(0px) rotateX(0deg) rotateY(${flipY}deg)`;
   }, [flipped]);
 
   return (
@@ -143,6 +122,13 @@ export default function HomePage() {
         ref={sceneRef}
         className={`scene${flipped ? " is-flipped" : ""}`}
         onClick={flip}
+        onMouseEnter={() => {
+          if (flippingRef.current) return;
+          const card = sceneRef.current?.querySelector(".card") as HTMLElement | null;
+          if (!card) return;
+          const flipY = flipped ? 180 : 0;
+          card.style.transform = `translateZ(${LIFT}px) rotateX(0deg) rotateY(${flipY}deg)`;
+        }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onKeyDown={(e) => {
@@ -206,7 +192,7 @@ export default function HomePage() {
                 <span className="info-text">
                   EMERGENCY CALLBACK SYSTEM.
                 </span>
-                <button className="phone-btn" onClick={copyNumber}>
+                <button className="phone-btn" onClick={(e) => { e.stopPropagation(); copyNumber(e); }}>
                   {copied ? "✓ COPIED TO CLIPBOARD" : PHONE_NUMBER}
                 </button>
               </div>
@@ -218,32 +204,30 @@ export default function HomePage() {
 
           {/* ═══ BACK ═══ */}
           <div className="face back">
-            <div className="back-pad">
-              <div className="jagged" style={{ clipPath: CLIP }}>
-                <div className="instr">
-                  <div className="instr-head">
-                    <span className="pixel-sm pixel-red">
-                      HOW TO USE THIS NUMBER
-                    </span>
-                  </div>
+            <div className="card-grain" aria-hidden="true" />
 
-                  <div className="steps-grid">
-                    {STEPS.map((s) => (
-                      <div key={s.n} className="step">
-                        <span className="step-n">{s.n}</span>
-                        <div className="step-r">
-                          <span className="step-t">{s.t}</span>
-                          <span className="step-d">{s.d}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+            <div className="instr">
+              <div className="instr-head">
+                <span className="pixel-sm">
+                  HOW TO USE THIS NUMBER
+                </span>
+              </div>
 
-                  <div className="instr-foot">
-                    <span>DATELINE v1.0</span>
-                    <span>← FLIP BACK</span>
+              <div className="steps-grid">
+                {STEPS.map((s) => (
+                  <div key={s.n} className="step">
+                    <span className="step-n">{s.n}</span>
+                    <div className="step-r">
+                      <span className="step-t">{s.t}</span>
+                      <span className="step-d">{s.d}</span>
+                    </div>
                   </div>
-                </div>
+                ))}
+              </div>
+
+              <div className="instr-foot">
+                <span>DATELINE v1.0</span>
+                <span>← FLIP BACK</span>
               </div>
             </div>
           </div>
