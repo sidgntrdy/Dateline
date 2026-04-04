@@ -238,6 +238,112 @@ export default function HomePage() {
               </svg>
             </div>
 
+            {/* Jail bars — heart breaking free */}
+            <svg
+              className="jail-bars"
+              viewBox="0 0 700 400"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <defs>
+                <filter
+                  id="bar-deboss"
+                  x="-20%"
+                  y="-5%"
+                  width="140%"
+                  height="110%"
+                >
+                  <feOffset dx="0" dy="2" in="SourceAlpha" result="off1" />
+                  <feGaussianBlur
+                    in="off1"
+                    stdDeviation="1.5"
+                    result="blur1"
+                  />
+                  <feComposite
+                    in="blur1"
+                    in2="SourceAlpha"
+                    operator="arithmetic"
+                    k2="-1"
+                    k3="1"
+                    result="innerShadow1"
+                  />
+                  <feFlood
+                    floodColor="#000000"
+                    floodOpacity="0.35"
+                    result="color1"
+                  />
+                  <feComposite
+                    in="color1"
+                    in2="innerShadow1"
+                    operator="in"
+                    result="shadow1"
+                  />
+                  <feOffset
+                    dx="0"
+                    dy="-1.5"
+                    in="SourceAlpha"
+                    result="off2"
+                  />
+                  <feGaussianBlur
+                    in="off2"
+                    stdDeviation="1"
+                    result="blur2"
+                  />
+                  <feComposite
+                    in="blur2"
+                    in2="SourceAlpha"
+                    operator="arithmetic"
+                    k2="-1"
+                    k3="1"
+                    result="innerShadow2"
+                  />
+                  <feFlood
+                    floodColor="#ffffff"
+                    floodOpacity="0.12"
+                    result="color2"
+                  />
+                  <feComposite
+                    in="color2"
+                    in2="innerShadow2"
+                    operator="in"
+                    result="shadow2"
+                  />
+                  <feFlood
+                    floodColor="#000000"
+                    floodOpacity="0.12"
+                    result="baseFill"
+                  />
+                  <feComposite
+                    in="baseFill"
+                    in2="SourceAlpha"
+                    operator="in"
+                    result="coloredBase"
+                  />
+                  <feMerge>
+                    <feMergeNode in="coloredBase" />
+                    <feMergeNode in="shadow1" />
+                    <feMergeNode in="shadow2" />
+                  </feMerge>
+                </filter>
+              </defs>
+              <g
+                filter="url(#bar-deboss)"
+                fill="none"
+                stroke="black"
+                strokeWidth="14"
+              >
+                {/* Outer straight bars */}
+                <line x1="100" y1="-10" x2="100" y2="410" />
+                <line x1="200" y1="-10" x2="200" y2="410" />
+                {/* Inner bars — bent outward by the heart */}
+                <path d="M 300 -10 L 300 70 C 300 110 230 150 230 200 C 230 250 300 290 300 330 L 300 410" />
+                <path d="M 400 -10 L 400 70 C 400 110 470 150 470 200 C 470 250 400 290 400 330 L 400 410" />
+                {/* Outer straight bars */}
+                <line x1="500" y1="-10" x2="500" y2="410" />
+                <line x1="600" y1="-10" x2="600" y2="410" />
+              </g>
+            </svg>
+
             {/* DATELINE title — spans full width */}
             <div className="front-title-wrap" aria-hidden="true">
               <span className="front-title">DATELYNE</span>
