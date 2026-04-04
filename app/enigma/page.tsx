@@ -171,7 +171,7 @@ export default function EnigmaPage() {
 
             <div className="instr">
               <div className="instr-head">
-                <span className="back-title">DATELYNE</span>
+                <span className="back-title">Dateleine</span>
                 <span className="pixel-sm">BAD DATE? CREEP? EMERGENCY?</span>
               </div>
 
@@ -188,7 +188,7 @@ export default function EnigmaPage() {
               </div>
 
               <div className="instr-foot">
-                <span>DATELYNE v1.0</span>
+                <span>Dateleine v1.0</span>
                 <span>← FLIP BACK</span>
               </div>
             </div>

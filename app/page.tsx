@@ -240,7 +240,7 @@ export default function HomePage() {
 
             {/* DATELINE title — spans full width */}
             <div className="front-title-wrap" aria-hidden="true">
-              <span className="front-title">DATELYNE</span>
+              <span className="front-title">DATELEINE</span>
             </div>
 
             {/* Bottom info bar */}
@@ -269,7 +269,7 @@ export default function HomePage() {
 
             <div className="instr">
               <div className="instr-head">
-                <span className="back-title">DATELYNE</span>
+                <span className="back-title">DATELEINE</span>
                 <span className="pixel-sm">BAD DATE? CREEP? EMERGENCY?</span>
               </div>
 
