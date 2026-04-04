@@ -4,8 +4,6 @@ import { useState, useCallback, useRef } from "react";
 
 const PHONE_NUMBER = "+1 (800) 911-5683";
 
-const HEART_D =
-  "M256 448l-30.164-27.211C118.718 322.927 48 258.373 48 180.539 48 117.428 97.918 66 160.243 66c36.196 0 70.266 16.71 95.757 43.178C281.491 82.71 315.561 66 351.757 66 414.082 66 464 117.428 464 180.539c0 77.834-70.718 142.388-177.836 240.25L256 448z";
 
 const STEPS = [
   {
@@ -34,7 +32,7 @@ const STEPS = [
 const TILT_MAX = 10; // degrees
 const LIFT = 40; // px — hover lift toward viewer
 
-export default function HomePage() {
+export default function EnigmaPage() {
   const [flipped, setFlipped] = useState(false);
   const [copied, setCopied] = useState(false);
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -88,16 +86,15 @@ export default function HomePage() {
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (flippingRef.current) return; // don't tilt during flip
+      if (flippingRef.current) return;
       const el = sceneRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      // Normalized -1 to 1 from center
       const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
       const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
       tiltRef.current = {
         x: nx * TILT_MAX,
-        y: -ny * TILT_MAX, // inverted: mouse up = tilt back
+        y: -ny * TILT_MAX,
       };
       cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(applyTilt);
@@ -114,7 +111,7 @@ export default function HomePage() {
   }, [flipped]);
 
   return (
-    <main className="page">
+    <main className="page enigma">
       <div className="grain" aria-hidden="true" />
       <div className="glow" aria-hidden="true" />
 
@@ -148,119 +145,24 @@ export default function HomePage() {
           <div className="face front">
             <div className="card-grain" aria-hidden="true" />
 
-            {/* Debossed heart — carpet-shaved / pressed into surface */}
-            <div className="emboss-wrap" aria-hidden="true">
+            {/* Logo + title lockup — centered */}
+            <div className="enigma-lockup" aria-hidden="true">
               <svg
-                className="deboss-svg"
-                viewBox="0 0 512 512"
+                className="enigma-logo"
+                viewBox="0 0 14 25"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <defs>
-                  <filter
-                    id="deboss"
-                    x="-10%"
-                    y="-10%"
-                    width="120%"
-                    height="120%"
-                  >
-                    {/* Inner shadow — dark on top-left edge */}
-                    <feOffset dx="0" dy="2" in="SourceAlpha" result="off1" />
-                    <feGaussianBlur
-                      in="off1"
-                      stdDeviation="1.5"
-                      result="blur1"
-                    />
-                    <feComposite
-                      in="blur1"
-                      in2="SourceAlpha"
-                      operator="arithmetic"
-                      k2="-1"
-                      k3="1"
-                      result="innerShadow1"
-                    />
-                    <feFlood
-                      floodColor="#000000"
-                      floodOpacity="0.35"
-                      result="color1"
-                    />
-                    <feComposite
-                      in="color1"
-                      in2="innerShadow1"
-                      operator="in"
-                      result="shadow1"
-                    />
-
-                    {/* Inner highlight — light on bottom-right edge */}
-                    <feOffset dx="0" dy="-1.5" in="SourceAlpha" result="off2" />
-                    <feGaussianBlur in="off2" stdDeviation="1" result="blur2" />
-                    <feComposite
-                      in="blur2"
-                      in2="SourceAlpha"
-                      operator="arithmetic"
-                      k2="-1"
-                      k3="1"
-                      result="innerShadow2"
-                    />
-                    <feFlood
-                      floodColor="#ffffff"
-                      floodOpacity="0.12"
-                      result="color2"
-                    />
-                    <feComposite
-                      in="color2"
-                      in2="innerShadow2"
-                      operator="in"
-                      result="shadow2"
-                    />
-
-                    {/* Fill the shape with a slightly darker red */}
-                    <feFlood
-                      floodColor="#000000"
-                      floodOpacity="0.12"
-                      result="baseFill"
-                    />
-                    <feComposite
-                      in="baseFill"
-                      in2="SourceAlpha"
-                      operator="in"
-                      result="coloredBase"
-                    />
-
-                    {/* Merge all layers */}
-                    <feMerge>
-                      <feMergeNode in="coloredBase" />
-                      <feMergeNode in="shadow1" />
-                      <feMergeNode in="shadow2" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                <path d={HEART_D} filter="url(#deboss)" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M13 18C12.7348 18 12.4805 17.8946 12.2929 17.7071C12.1054 17.5196 12 17.2652 12 17L12 1C12 0.734784 12.1054 0.480429 12.2929 0.292892C12.4805 0.105356 12.7348 0 13 0C13.2652 0 13.5196 0.105356 13.7071 0.292892C13.8947 0.480429 14 0.734784 14 1L14 17C14 17.2652 13.8947 17.5196 13.7071 17.7071C13.5196 17.8946 13.2652 18 13 18Z" fill="white" />
+                <path d="M13 17L7.00003 24" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M4.00003 21C3.73481 21 3.48046 20.9122 3.29292 20.7559C3.10539 20.5996 3.00003 20.3877 3.00003 20.1667L3.00003 6.83333C3.00003 6.61232 3.10539 6.40036 3.29292 6.24408C3.48046 6.0878 3.73481 6 4.00003 6C4.26525 6 4.5196 6.0878 4.70714 6.24408C4.89467 6.40036 5.00003 6.61232 5.00003 6.83333L5.00003 20.1667C5.00003 20.3877 4.89467 20.5996 4.70714 20.7559C4.5196 20.9122 4.26525 21 4.00003 21Z" fill="white" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M7.00003 25C6.73481 25 6.48046 24.9122 6.29292 24.7559C6.10539 24.5996 6.00003 24.3877 6.00003 24.1667L6.00003 10.8333C6.00003 10.6123 6.10539 10.4004 6.29292 10.2441C6.48046 10.0878 6.73481 10 7.00003 10C7.26525 10 7.5196 10.0878 7.70714 10.2441C7.89467 10.4004 8.00003 10.6123 8.00003 10.8333L8.00003 24.1667C8.00003 24.3877 7.89467 24.5996 7.70714 24.7559C7.5196 24.9122 7.26525 25 7.00003 25Z" fill="white" />
+                <path fillRule="evenodd" clipRule="evenodd" d="M1.00003 18C1.26525 18 1.5196 17.8946 1.70714 17.7071C1.89467 17.5196 2.00003 17.2652 2.00003 17L2.00003 1C2.00003 0.734784 1.89467 0.480429 1.70714 0.292892C1.5196 0.105356 1.26525 0 1.00003 0C0.734814 0 0.48046 0.105356 0.292924 0.292892C0.105388 0.480429 3.05176e-05 0.734784 3.05176e-05 1L3.05176e-05 17C3.05176e-05 17.2652 0.105388 17.5196 0.292924 17.7071C0.48046 17.8946 0.734814 18 1.00003 18Z" fill="white" />
+                <path d="M1.00003 17L7.00003 24" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </div>
-
-            {/* DATELINE title — spans full width */}
-            <div className="front-title-wrap" aria-hidden="true">
-              <span className="front-title">DATELYNE</span>
+              <span className="enigma-title">Enigma Labs</span>
             </div>
 
             {/* Bottom info bar */}
-            <div className="front-bottom">
-              <div className="front-left">
-                <span className="info-text">EMERGENCY CALLBACK SYSTEM.</span>
-                <button
-                  className="phone-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyNumber(e);
-                  }}
-                >
-                  {copied ? "✓ COPIED TO CLIPBOARD" : PHONE_NUMBER}
-                </button>
-              </div>
-              <div className="front-right">
-                <span className="action-text">FLIP →</span>
-              </div>
-            </div>
           </div>
 
           {/* ═══ BACK ═══ */}
@@ -286,7 +188,7 @@ export default function HomePage() {
               </div>
 
               <div className="instr-foot">
-                <span>DATELINE v1.0</span>
+                <span>DATELYNE v1.0</span>
                 <span>← FLIP BACK</span>
               </div>
             </div>
